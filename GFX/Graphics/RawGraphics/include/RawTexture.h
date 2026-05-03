@@ -1,6 +1,6 @@
 #pragma once
 #include "GFX/Core/BaseTypes/include/NonCopyableButMovable.h"
-#include "glad/glad.h"
+#include "ExternalLibs/GLAD/include/glad/glad.h"
 
 #include <memory>
 

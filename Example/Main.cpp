@@ -10,6 +10,8 @@
 
 #include "ExternalLibs/GLM/glm//gtc/matrix_transform.hpp"
 #include "ExternalLibs/GLM/glm/glm.hpp"
+#include "GFX/Graphics/Graphics/include/Texture.h"
+
 #include <memory>
 
 int main()
@@ -28,6 +30,11 @@ int main()
     // =========================
     auto shader = GFX::Graphics::Shader::create("Assets/Shaders/vertex.glsl",
                                                 "Assets/Shaders/fragment.glsl");
+
+    // =========================
+    // TEXTURE
+    // =========================
+    auto texture = GFX::Graphics::Texture::create("Assets/Textures/Cube.png");
 
     // =========================
     // GPU OBJECTS
@@ -70,11 +77,14 @@ int main()
             model = glm::rotate(model, time * 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
             model = glm::rotate(model, time * 0.5f, glm::vec3(1.0f, 0.0f, 0.0f));
 
+            texture->use();
+            shader->setInt("uTexture", 0);
+
             shader->setMatrix4("uModel", model);
             shader->setMatrix4("uView", view);
             shader->setMatrix4("uProjection", projection);
 
-            // light & color (обязательно для твоего fragment shader)
+            // light & color
             shader->setVector3("uLightPos", glm::vec3(2.0f, 2.0f, 2.0f));
             shader->setVector3("uViewPos", glm::vec3(0.0f, 0.0f, 3.0f));
             shader->setVector3("uColor", glm::vec3(0.8f, 0.3f, 0.2f));
@@ -83,6 +93,7 @@ int main()
 
             glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size()));
 
+            texture->unuse();
             vao.unbind();
         });
 
