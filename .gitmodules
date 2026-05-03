@@ -1,0 +1,12 @@
+[submodule "ExternalLibs/GLM"]
+	path = ExternalLibs/GLM
+	url = https://github.com/g-truc/glm.git
+[submodule "ExternalLibs/GLFW"]
+	path = ExternalLibs/GLFW
+	url = https://github.com/glfw/glfw.git
+[submodule "ExternalLibs/spdlog"]
+	path = ExternalLibs/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "ExternalLibs/Assimp"]
+	path = ExternalLibs/Assimp
+	url = https://github.com/assimp/assimp.git
