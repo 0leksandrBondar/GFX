@@ -28,6 +28,7 @@ namespace GFX::Core
         ~Loader() = default;
 
     public:
-       static std::vector<Vertex> loadOBJ(const std::filesystem::path& path);
+        static std::vector<Vertex> loadModel(const std::filesystem::path& path);
+        static std::vector<Vertex> loadOBJ(const std::filesystem::path& path);
     };
 } // namespace GFX::Core

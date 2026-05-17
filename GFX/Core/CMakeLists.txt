@@ -22,6 +22,7 @@ target_include_directories(GFX_Core
 target_link_libraries(GFX_Core
         PRIVATE
         spdlog::spdlog
+        assimp::assimp
         glad
         glm
         glfw

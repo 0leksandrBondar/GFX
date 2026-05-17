@@ -1,87 +1,74 @@
 #include "GFX/Core/Loader/include/Loader.h"
 
+#include "assimp/Importer.hpp"
+#include "assimp/postprocess.h"
+#include "assimp/scene.h"
 #include "spdlog/spdlog.h"
-
-#include <fstream>
-#include <sstream>
 
 namespace GFX::Core
 {
-    std::vector<Vertex> Loader::loadOBJ(const std::filesystem::path& path)
+    namespace
     {
-        std::ifstream file(path);
-        if (!file.is_open())
+        Vec3 toVec3(const aiVector3D& value)
         {
-            spdlog::warn("LoadOBJ: Could not open file {}", path.string());
+            return { value.x, value.y, value.z };
+        }
+
+        Vec2 toVec2(const aiVector3D& value)
+        {
+            return { value.x, value.y };
+        }
+    } // namespace
+
+    std::vector<Vertex> Loader::loadModel(const std::filesystem::path& path)
+    {
+        Assimp::Importer importer;
+        const aiScene* scene = importer.ReadFile(
+            path.string(),
+            aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace
+                | aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality
+                | aiProcess_OptimizeMeshes);
+
+        if (!scene || !scene->mRootNode || (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
+        {
+            spdlog::warn("LoadModel: Could not load file '{}': {}", path.string(),
+                         importer.GetErrorString());
             return {};
         }
 
-        std::vector<Vec3> positions;
-        std::vector<Vec2> uvs;
-        std::vector<Vec3> normals;
-
         std::vector<Vertex> vertices;
 
-        std::string line;
-
-        while (std::getline(file, line))
+        for (unsigned int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
         {
-            std::istringstream ss(line);
-            std::string prefix;
-            ss >> prefix;
+            const aiMesh* mesh = scene->mMeshes[meshIndex];
+            if (!mesh)
+                continue;
 
-            if (prefix == "v")
-            {
-                Vec3 v{};
-                ss >> v.x >> v.y >> v.z;
-                positions.push_back(v);
-            }
-            else if (prefix == "vt")
-            {
-                Vec2 vt{};
-                ss >> vt.u >> vt.v;
-                uvs.push_back(vt);
-            }
-            else if (prefix == "vn")
-            {
-                Vec3 vn{};
-                ss >> vn.x >> vn.y >> vn.z;
-                normals.push_back(vn);
-            }
-            else if (prefix == "f")
-            {
-                std::string v1, v2, v3, v4;
-                ss >> v1 >> v2 >> v3 >> v4;
+            vertices.reserve(vertices.size() + mesh->mNumFaces * 3);
 
-                std::vector<std::string> face = { v1, v2, v3 };
-                if (!v4.empty())
-                    face.push_back(v4);
-
-                // триангуляция
-                for (int i = 1; i < face.size() - 1; i++)
+            for (unsigned int faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
+            {
+                const aiFace& face = mesh->mFaces[faceIndex];
+                if (face.mNumIndices != 3)
                 {
-                    std::string tri[3] = { face[0], face[i], face[i + 1] };
+                    spdlog::warn("LoadModel: Skipping non-triangle face in '{}'", path.string());
+                    continue;
+                }
 
-                    for (const auto& k : tri)
-                    {
-                        std::istringstream vs(k);
-                        std::string p, t, n;
+                for (unsigned int indexIndex = 0; indexIndex < face.mNumIndices; ++indexIndex)
+                {
+                    const unsigned int vertexIndex = face.mIndices[indexIndex];
 
-                        std::getline(vs, p, '/');
-                        std::getline(vs, t, '/');
-                        std::getline(vs, n, '/');
+                    Vertex vertex{};
+                    vertex.position = toVec3(mesh->mVertices[vertexIndex]);
 
-                        int pi = std::stoi(p) - 1;
-                        int ti = std::stoi(t) - 1;
-                        int ni = std::stoi(n) - 1;
+                    if (mesh->HasTextureCoords(0))
+                        vertex.uv = toVec2(mesh->mTextureCoords[0][vertexIndex]);
 
-                        Vertex vert{};
-                        vert.position = positions[pi];
-                        vert.uv = uvs[ti];
-                        vert.normal = normals[ni];
+                    if (mesh->HasNormals())
+                        vertex.normal = toVec3(mesh->mNormals[vertexIndex]);
 
-                        vertices.push_back(vert);
-                    }
+                    vertices.push_back(vertex);
                 }
             }
         }
@@ -89,4 +76,8 @@ namespace GFX::Core
         return vertices;
     }
 
+    std::vector<Vertex> Loader::loadOBJ(const std::filesystem::path& path)
+    {
+        return loadModel(path);
+    }
 } // namespace GFX::Core

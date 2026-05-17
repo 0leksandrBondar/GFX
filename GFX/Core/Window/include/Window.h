@@ -6,11 +6,14 @@
 // clang-format on
 
 #include "GFX/Core/BaseTypes/include/NonCopyableButMovable.h"
+#include "GFX/Core/Input/include/InputHandler.h"
 
 #include <functional>
 
 namespace GFX::Core
 {
+    class Camera;
+
     using OnFrameCallback = std::function<void(float deltaTime)>;
 
     class Window final : public NonCopyableButMovable
@@ -20,6 +23,15 @@ namespace GFX::Core
 
         void runMainLoop();
         void setOnFrameCallback(const OnFrameCallback& callback) { _onFrameCallback = callback; }
+        void close() const;
+
+        [[nodiscard]] InputHandler& getInput() { return _input; }
+        [[nodiscard]] const InputHandler& getInput() const { return _input; }
+        void setCursorCaptured(bool captured) { _input.setCursorCaptured(_window, captured); }
+        void setCamera(Camera& camera) { _camera = &camera; }
+        void clearCamera() { _camera = nullptr; }
+        [[nodiscard]] Camera* getCamera() { return _camera; }
+        [[nodiscard]] const Camera* getCamera() const { return _camera; }
 
         static void enableDepth() { glEnable(GL_DEPTH_TEST); };
 
@@ -36,6 +48,8 @@ namespace GFX::Core
     private:
         GLFWwindow* _window{ nullptr };
         OnFrameCallback _onFrameCallback{ nullptr };
+        InputHandler _input;
+        Camera* _camera{ nullptr };
 
         int _width{ 0 };
         int _height{ 0 };

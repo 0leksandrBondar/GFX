@@ -40,6 +40,8 @@ namespace GFX::Core
         Timer timer;
         while (!glfwWindowShouldClose(_window))
         {
+            glfwPollEvents();
+
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
@@ -49,8 +51,12 @@ namespace GFX::Core
                 _onFrameCallback(timer.getDeltaTime());
 
             glfwSwapBuffers(_window);
-            glfwPollEvents();
         }
+    }
+
+    void Window::close() const
+    {
+        glfwSetWindowShouldClose(_window, GLFW_TRUE);
     }
 
     void Window::initWindow(const char* title)
@@ -66,11 +72,34 @@ namespace GFX::Core
         gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
     }
 
-    void Window::onMouseMove(GLFWwindow* window, const double x, const double y) {}
-    void Window::onMouseScroll(GLFWwindow* window, const double x, const double y) {};
+    void Window::onMouseMove(GLFWwindow* window, const double x, const double y)
+    {
+        auto* owner = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        if (owner)
+            owner->_input.setMousePosition(x, y);
+    }
+
+    void Window::onMouseScroll(GLFWwindow* window, const double x, const double y)
+    {
+        auto* owner = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        if (owner)
+            owner->_input.addScroll(x, y);
+    };
+
     void Window::onWindowResize(GLFWwindow* window, int width, int height) {};
-    void Window::onMouseButton(GLFWwindow* window, const int button, const int action, int mods) {};
+    void Window::onMouseButton(GLFWwindow* window, const int button, const int action, int mods)
+    {
+        auto* owner = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        if (owner)
+            owner->_input.setMouseButton(button, action);
+    };
+
     void Window::onKeyboardButton(GLFWwindow* window, const int key, int scancode, const int action,
-                                  int mods) {};
+                                  int mods)
+    {
+        auto* owner = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        if (owner)
+            owner->_input.setKey(key, action);
+    };
 
 } // namespace GFX::Core
