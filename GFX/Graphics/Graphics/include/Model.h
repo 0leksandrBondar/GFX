@@ -5,6 +5,7 @@
 #include "GFX/Graphics/RawGraphics/include/VertexArrayObject.h"
 #include "GFX/Graphics/RawGraphics/include/VertexBufferObject.h"
 
+#include <filesystem>
 #include <vector>
 
 namespace GFX::Graphics
@@ -12,14 +13,18 @@ namespace GFX::Graphics
     class Model final : public Core::Transformable
     {
     public:
+        explicit Model(const std::filesystem::path& path);
         explicit Model(const std::vector<Core::Vertex>& vertices);
 
-        void draw() const;
+        static Model load(const std::filesystem::path& path);
+
+        void bind() const { _vao.bind(); }
 
         [[nodiscard]] const glm::mat4& getModelMatrix() const { return getTransformMatrix(); }
         [[nodiscard]] GLsizei getVertexCount() const { return _vertexCount; }
 
     private:
+        void setVertices(const std::vector<Core::Vertex>& vertices);
         void updateBounds(const std::vector<Core::Vertex>& vertices);
 
     private:

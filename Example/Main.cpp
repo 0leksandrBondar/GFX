@@ -1,8 +1,9 @@
 #include "ExternalLibs/GLM/glm/ext/matrix_transform.hpp"
 #include "GFX/Core/Camera/include/Camera.h"
-#include "GFX/Core/Loader/include/Loader.h"
 #include "GFX/Core/Window/include/Window.h"
+#include "GFX/Graphics/Graphics/include/Material.h"
 #include "GFX/Graphics/Graphics/include/Model.h"
+#include "GFX/Graphics/Graphics/include/Renderer.h"
 #include "GFX/Graphics/RawGraphics/include/Shader.h"
 
 #include "ExternalLibs/GLM/glm//gtc/matrix_transform.hpp"
@@ -19,11 +20,6 @@ int main()
     window->setCursorCaptured(true);
 
     // =========================
-    // LOAD MESH
-    // =========================
-    auto vertices = GFX::Core::Loader::loadOBJ("Assets/Objects/Cube.obj");
-
-    // =========================
     // SHADER
     // =========================
     auto shader = GFX::Graphics::Shader::create("Assets/Shaders/vertex.glsl",
@@ -33,9 +29,15 @@ int main()
     // TEXTURE
     // =========================
     auto texture = GFX::Graphics::Texture::create("Assets/Textures/Cube.png");
+    GFX::Graphics::Material cubeMaterial(shader);
+    cubeMaterial.setTexture("uTexture", texture);
+    cubeMaterial.setVector3("uLightPos", glm::vec3(2.0f, 2.0f, 2.0f));
+    cubeMaterial.setVector3("uColor", glm::vec3(0.8f, 0.3f, 0.2f));
 
-    GFX::Graphics::Model cube(vertices);
+    auto cube = GFX::Graphics::Model::load("Assets/Objects/Cube.obj");
+
     cube.setScale(1.0f, 1.0f, 1.0f);
+    GFX::Graphics::Renderer renderer;
 
     GFX::Core::Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
     camera.setPerspective(45.0f, 1100.0f / 900.0f, 0.1f, 100.0f);
@@ -53,34 +55,15 @@ int main()
                 window->close();
 
             const GFX::Core::Camera* activeCamera = window->getCamera();
-            const glm::mat4 view = activeCamera ? activeCamera->getViewMatrix() : glm::mat4(1.0f);
-            const glm::mat4 projection
-                = activeCamera ? activeCamera->getProjectionMatrix() : glm::mat4(1.0f);
+            if (!activeCamera)
+                return;
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            shader->use();
 
             float time = static_cast<float>(glfwGetTime());
 
             cube.setRotation(time * 30.0f, time * 60.0f, 0.0f);
-
-            texture->use();
-            shader->setInt("uTexture", 0);
-
-            shader->setMatrix4("uModel", cube.getModelMatrix());
-            shader->setMatrix4("uView", view);
-            shader->setMatrix4("uProjection", projection);
-
-            // light & color
-            shader->setVector3("uLightPos", glm::vec3(2.0f, 2.0f, 2.0f));
-            shader->setVector3("uViewPos",
-                               activeCamera ? activeCamera->getPosition() : glm::vec3(0.0f));
-            shader->setVector3("uColor", glm::vec3(0.8f, 0.3f, 0.2f));
-
-            cube.draw();
-
-            texture->unuse();
+            renderer.draw(cube, cubeMaterial, *activeCamera);
         });
 
     window->runMainLoop();

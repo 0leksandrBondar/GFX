@@ -3,10 +3,26 @@
 #include "GFX/Graphics/RawGraphics/include/VertexBufferLayout.h"
 
 #include <algorithm>
+#include <filesystem>
 
 namespace GFX::Graphics
 {
+    Model::Model(const std::filesystem::path& path)
+    {
+        setVertices(Core::Loader::loadModel(path));
+    }
+
     Model::Model(const std::vector<Core::Vertex>& vertices)
+    {
+        setVertices(vertices);
+    }
+
+    Model Model::load(const std::filesystem::path& path)
+    {
+        return Model(path);
+    }
+
+    void Model::setVertices(const std::vector<Core::Vertex>& vertices)
     {
         updateBounds(vertices);
 
@@ -19,12 +35,6 @@ namespace GFX::Graphics
 
         _vao.addBuffer(_vbo, layout);
         _vertexCount = static_cast<GLsizei>(vertices.size());
-    }
-
-    void Model::draw() const
-    {
-        _vao.bind();
-        glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
     }
 
     void Model::updateBounds(const std::vector<Core::Vertex>& vertices)

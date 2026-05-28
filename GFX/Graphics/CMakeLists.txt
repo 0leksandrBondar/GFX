@@ -20,6 +20,9 @@ target_include_directories(GFX_Graphics
 )
 
 target_link_libraries(GFX_Graphics
+        PUBLIC
+        GFX::Core
+
         PRIVATE
         spdlog::spdlog
         glad
