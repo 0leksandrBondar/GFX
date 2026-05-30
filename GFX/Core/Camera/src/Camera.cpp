@@ -50,10 +50,8 @@ namespace GFX::Core
     {
         if (_projectionMode == CameraProjectionMode::Orthographic)
         {
-            const float halfHeight = _orthographicVerticalSize * 0.5f;
-            const float halfWidth = halfHeight * _aspectRatio;
-            return glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, _nearPlane,
-                              _farPlane);
+            return glm::ortho(_orthographicLeft, _orthographicRight, _orthographicBottom,
+                              _orthographicTop, _nearPlane, _farPlane);
         }
 
         return glm::perspective(glm::radians(_verticalFovDegrees), _aspectRatio, _nearPlane,
@@ -81,6 +79,25 @@ namespace GFX::Core
         _projectionMode = CameraProjectionMode::Orthographic;
         _orthographicVerticalSize = verticalSize;
         _aspectRatio = aspectRatio;
+        const float halfHeight = _orthographicVerticalSize * 0.5f;
+        const float halfWidth = halfHeight * _aspectRatio;
+        _orthographicLeft = -halfWidth;
+        _orthographicRight = halfWidth;
+        _orthographicBottom = -halfHeight;
+        _orthographicTop = halfHeight;
+        setClipPlanes(nearPlane, farPlane);
+    }
+
+    void Camera::setOrthographic(const float left, const float right, const float bottom,
+                                 const float top, const float nearPlane, const float farPlane)
+    {
+        _projectionMode = CameraProjectionMode::Orthographic;
+        _orthographicLeft = left;
+        _orthographicRight = right;
+        _orthographicBottom = bottom;
+        _orthographicTop = top;
+        _orthographicVerticalSize = std::abs(top - bottom);
+        _aspectRatio = std::abs((right - left) / (top - bottom));
         setClipPlanes(nearPlane, farPlane);
     }
 

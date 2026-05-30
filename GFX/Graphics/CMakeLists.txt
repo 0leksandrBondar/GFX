@@ -25,6 +25,7 @@ target_link_libraries(GFX_Graphics
 
         PRIVATE
         spdlog::spdlog
+        freetype
         glad
         glm
         glfw

@@ -39,6 +39,8 @@ namespace GFX::Core
                             float farPlane);
         void setOrthographic(float verticalSize, float aspectRatio, float nearPlane,
                              float farPlane);
+        void setOrthographic(float left, float right, float bottom, float top, float nearPlane,
+                             float farPlane);
 
     private:
         void updateDirection();
@@ -59,5 +61,9 @@ namespace GFX::Core
         float _aspectRatio{ 16.0f / 9.0f };
         float _nearPlane{ 0.1f };
         float _farPlane{ 100.0f };
+        float _orthographicLeft{ -5.0f };
+        float _orthographicRight{ 5.0f };
+        float _orthographicBottom{ -5.0f };
+        float _orthographicTop{ 5.0f };
     };
 } // namespace GFX::Core

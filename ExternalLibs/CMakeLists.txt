@@ -9,6 +9,7 @@ add_subdirectory(GLM)
 add_subdirectory(GLFW)
 add_subdirectory(SPDLOG)
 add_subdirectory(Assimp)
+add_subdirectory(FreeType)
 
 if(MINGW AND TARGET assimp)
     get_target_property(ASSIMP_LINK_LIBRARIES assimp LINK_LIBRARIES)

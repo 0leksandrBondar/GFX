@@ -8,6 +8,9 @@
 
 #include "ExternalLibs/GLM/glm//gtc/matrix_transform.hpp"
 #include "ExternalLibs/GLM/glm/glm.hpp"
+#include "GFX/Graphics/Graphics/include/Font.h"
+#include "GFX/Graphics/Graphics/include/Text.h"
+#include "GFX/Graphics/Graphics/include/TextRenderer.h"
 #include "GFX/Graphics/Graphics/include/Texture.h"
 
 #include <memory>
@@ -17,7 +20,7 @@ int main()
     auto window = std::make_shared<GFX::Core::Window>(1100, 900, "Example");
 
     GFX::Core::Window::enableDepth();
-    window->setCursorCaptured(true);
+    //window->setCursorCaptured(true);
 
     // =========================
     // SHADER
@@ -43,6 +46,21 @@ int main()
     camera.setPerspective(45.0f, 1100.0f / 900.0f, 0.1f, 100.0f);
     window->setCamera(camera);
 
+    GFX::Core::Camera uiCamera(glm::vec3(0.0f, 0.0f, 1.0f));
+    uiCamera.setOrthographic(0.0f, 1100.0f, 900.0f, 0.0f, 0.1f, 10.0f);
+
+    auto font = GFX::Graphics::Font::create("Assets/Fonts/arial.TTF", 32);
+    auto textShader = GFX::Graphics::Shader::create(
+        "Assets/Shaders/text_vertex.glsl",
+        "Assets/Shaders/text_fragment.glsl");
+
+    GFX::Graphics::Text text(font, "Hello, World!");
+    text.setPosition(20.0f, 40.0f, 0.0f);
+    text.setColor(glm::vec4(1.0f, 0.9f, 0.3f, 1.0f));
+    text.setBold(true);
+
+    GFX::Graphics::TextRenderer textRenderer(textShader);
+
 
     // =========================
     // RENDER LOOP
@@ -63,7 +81,10 @@ int main()
             float time = static_cast<float>(glfwGetTime());
 
             cube.setRotation(time * 30.0f, time * 60.0f, 0.0f);
+
             renderer.draw(cube, cubeMaterial, *activeCamera);
+            textRenderer.draw(text, uiCamera);
+
         });
 
     window->runMainLoop();

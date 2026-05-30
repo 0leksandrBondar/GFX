@@ -10,3 +10,6 @@
 [submodule "ExternalLibs/Assimp"]
 	path = ExternalLibs/Assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "ExternalLibs/FreeType"]
+	path = ExternalLibs/FreeType
+	url = https://github.com/freetype/freetype.git
