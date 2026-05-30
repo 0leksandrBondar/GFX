@@ -7,4 +7,9 @@ namespace GFX::Graphics
     Text::Text(FontPtr font, std::string string) : _font(std::move(font)), _string(std::move(string))
     {
     }
+
+    Text::Text(FontPtr font, ShaderPtr shader, std::string string)
+        : _font(std::move(font)), _shader(std::move(shader)), _string(std::move(string))
+    {
+    }
 } // namespace GFX::Graphics

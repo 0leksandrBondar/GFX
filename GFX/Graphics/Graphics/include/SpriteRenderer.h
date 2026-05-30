@@ -1,42 +1,36 @@
 #pragma once
 
-#include "GFX/Core/Camera/include/Camera.h"
-#include "GFX/Graphics/Graphics/include/Text.h"
-#include "GFX/Graphics/RawGraphics/include/Shader.h"
-
 #include "ExternalLibs/GLM/glm/vec2.hpp"
 #include "ExternalLibs/GLM/glm/vec3.hpp"
+#include "GFX/Core/Camera/include/Camera.h"
+#include "GFX/Graphics/Graphics/include/Sprite.h"
 
 #include <utility>
 #include <vector>
 
 namespace GFX::Graphics
 {
-    class TextRenderer final : public Core::NonCopyableButMovable
+    class SpriteRenderer final : public Core::NonCopyableButMovable
     {
     public:
-        TextRenderer();
-        ~TextRenderer();
+        SpriteRenderer();
+        ~SpriteRenderer();
 
-        TextRenderer(TextRenderer&& other) noexcept;
-        TextRenderer& operator=(TextRenderer&& other) noexcept;
+        SpriteRenderer(SpriteRenderer&& other) noexcept;
+        SpriteRenderer& operator=(SpriteRenderer&& other) noexcept;
 
-        void draw(const Text& text, const Core::Camera& camera);
+        void draw(const Sprite& sprite, const Core::Camera& camera);
         void setDefaultShader(ShaderPtr shader) { _defaultShader = std::move(shader); }
         [[nodiscard]] const ShaderPtr& getDefaultShader() const { return _defaultShader; }
         void setDepthTestEnabled(bool enabled) { _depthTestEnabled = enabled; }
         [[nodiscard]] bool isDepthTestEnabled() const { return _depthTestEnabled; }
 
     private:
-        struct TextVertex
+        struct SpriteVertex
         {
             glm::vec3 position{ 0.0f };
             glm::vec2 uv{ 0.0f };
         };
-
-        void appendGlyph(std::vector<TextVertex>& vertices, std::vector<unsigned int>& indices,
-                         const Font& font, const Glyph& glyph, float penX, float penY,
-                         float boldOffset);
 
     private:
         ShaderPtr _defaultShader{ nullptr };

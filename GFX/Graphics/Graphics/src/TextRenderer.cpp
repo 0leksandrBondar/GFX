@@ -52,7 +52,7 @@ namespace GFX::Graphics
         }
     } // namespace
 
-    TextRenderer::TextRenderer(ShaderPtr shader) : _shader(std::move(shader))
+    TextRenderer::TextRenderer()
     {
         glGenVertexArrays(1, &_vao);
         glGenBuffers(1, &_vbo);
@@ -95,7 +95,7 @@ namespace GFX::Graphics
         glDeleteBuffers(1, &_vbo);
         glDeleteVertexArrays(1, &_vao);
 
-        _shader = std::move(other._shader);
+        _defaultShader = std::move(other._defaultShader);
         _vao = other._vao;
         _vbo = other._vbo;
         _ebo = other._ebo;
@@ -109,7 +109,9 @@ namespace GFX::Graphics
     void TextRenderer::draw(const Text& text, const Core::Camera& camera)
     {
         const FontPtr& font = text.getFont();
-        if (!font || !_shader || text.getString().empty())
+        const ShaderPtr& shader = text.getShader() ? text.getShader() : _defaultShader;
+
+        if (!font || !shader || text.getString().empty())
             return;
 
         std::vector<TextVertex> vertices;
@@ -146,12 +148,12 @@ namespace GFX::Graphics
         if (indices.empty())
             return;
 
-        _shader->use();
-        _shader->setMatrix4("uModel", text.getTransformMatrix());
-        _shader->setMatrix4("uView", camera.getViewMatrix());
-        _shader->setMatrix4("uProjection", camera.getProjectionMatrix());
-        _shader->setVector4("uColor", text.getColor());
-        _shader->setInt("uFontAtlas", 0);
+        shader->use();
+        shader->setMatrix4("uModel", text.getTransformMatrix());
+        shader->setMatrix4("uView", camera.getViewMatrix());
+        shader->setMatrix4("uProjection", camera.getProjectionMatrix());
+        shader->setVector4("uColor", text.getColor().toVec4());
+        shader->setInt("uFontAtlas", 0);
 
         font->bind(0);
 
